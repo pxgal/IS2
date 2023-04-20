@@ -65,8 +65,4 @@ public class Excelmanager {
     public Iterator<Row> getRowIterator() {
         return sheet.rowIterator();
     }
-    
-    public void genEmail(){
-        
-    }
 }
