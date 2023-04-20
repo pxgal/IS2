@@ -94,20 +94,26 @@ public class Main {
             if (isRowNotEmpty) {
                 //1- Verificacion del codigo de cuenta bancaria de cliente y generacion del IBAN asociado
                 String ccc = row.getCell(1).getStringCellValue();
+                String newCCC = "";
                 String cccPartes[] = new String[3];
-                if (validarCalcuarCCC(ccc, cccPartes)) {//si es correcto
+                if (validarCalcuarCCC(ccc, cccPartes)) {//si el CCC es correcto
 
-                    StringBuilder sb = new StringBuilder();
+                    newCCC = unirPartes(cccPartes);
 
-                    for (String palabra : cccPartes) {
-                        sb.append(palabra);
-                    }
+                    //1.2-crear IBAN
+                    String pais = row.getCell(0).getStringCellValue();
+                    String IBAN = crearIBAN(newCCC, pais);
+                } else {//si el CCC es incorrecto
 
-                    String newccc = sb.toString();
-                    System.out.println(newccc);
-                } else {//si es incorrecto
+                    newCCC = unirPartes(cccPartes);
 
+                    //1.2-Crear IBAN
+                    String pais = row.getCell(0).getStringCellValue();
+                    String IBAN = crearIBAN(newCCC, pais);
+                    //1.2.1- añadirlo al XML
                 }
+
+                //2-Correo
             }
         }
     }
@@ -154,6 +160,35 @@ public class Main {
         cccPartes[1] = "" + digito1 + "" + digito2 + "";
         cccPartes[2] = parte3;
         return ok;
+    }
+
+    private static String unirPartes(String[] cccPartes) {
+
+        StringBuilder sb = new StringBuilder();
+
+        for (String palabra : cccPartes) {
+            sb.append(palabra);
+        }
+
+        String newccc = sb.toString();
+        System.out.println(newccc);
+        return newccc;
+    }
+
+    private static String crearIBAN(String ccc, String pais) {
+
+        //sacar codificacion numerica de las letras del pais || A = 65 => 12 = A - 55
+        String paisNum = "" + String.valueOf((int) pais.charAt(0)) + "" + String.valueOf((int) pais.charAt(1)) + "00";
+        String codigo = ccc + paisNum + "00";
+
+        //hacer los calculos
+        int num = Integer.parseInt(codigo);
+        int cod = 98 - num;
+        String codS = "" + cod;
+        if (codS.length() < 2) {
+            codS = "0" + codS;
+        }
+        return pais + codS + ccc;
     }
 
 }
