@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package mapeo.is2;
+package controlador;
 
 import java.sql.Connection;
 import java.util.Scanner;
