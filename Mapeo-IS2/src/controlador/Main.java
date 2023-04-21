@@ -27,6 +27,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import java.math.BigInteger;
 import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.*;
+import java.text.DecimalFormat;
 
 /**
  *
@@ -82,6 +83,16 @@ public class Main {
                 //1.1- imprimir en la cell
                 writeCell(row, 1, newCCC);//el CCC
                 writeCell(row, 2, IBAN);//el IBAN
+                
+                /* Obtener los datos para generar los correos */
+                String nombreUsuario = row.getCell(10).getStringCellValue();
+                String apellido1Usuario = row.getCell(8).getStringCellValue();
+                String apellido2Usuario = row.getCell(9).getStringCellValue();
+                String empresaUsuario = row.getCell(6).getStringCellValue();
+                String emailUsuario = generarEmail(nombreUsuario, apellido1Usuario, apellido2Usuario, empresaUsuario);
+                
+                /* Imprimir en la celda de email */
+                writeCell(row, 3, emailUsuario);
             }
         }
         gestionE.modAndShutDown();
@@ -159,6 +170,30 @@ public class Main {
             codS = "0" + codS;
         }
         return "" + pais + codS + ccc + "";
+    }
+    
+    private static String generarEmail(String nombre, String apellido1, String apellido2, String empresa){
+        ArrayList<String> usuariosCorreo = new ArrayList<>();
+        char letraNombre, letraApellido1, letraApellido2;
+        letraNombre = nombre.charAt(0);
+        letraApellido1 = apellido1.charAt(0);
+        if(apellido2 != null){
+            letraApellido2 = apellido2.charAt(0);
+        }else{
+            letraApellido2 = '\0';
+        }
+        String dominio = empresa + ".com";
+        DecimalFormat formatoContador = new DecimalFormat("00");
+        String user = Character.toString(letraNombre) + Character.toString(letraApellido1)+ Character.toString(letraApellido2);
+        usuariosCorreo.add(user);
+        int repes = 0;
+        for(int i = 0 ; i < usuariosCorreo.size(); i++){
+            if(usuariosCorreo.get(i).equals(user)){
+                repes++;
+            }
+        }
+        String email = user + formatoContador.format(repes) + dominio;
+        return email;
     }
 
     private static void writeCell(Row row, int i, String in) {
