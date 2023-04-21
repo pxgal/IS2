@@ -40,14 +40,13 @@ public class Main {
     public static void main(String[] args) throws IOException {
         //P3
         Excelmanager gestionE = new Excelmanager("/src/resources/SistemasInformacionII.xlsx");
-        Sheet traC = gestionE.getSheet(0);
 
         //Iterador de las filas de la hoja
         Iterator<Row> rowIterator = gestionE.getRowIterator();
         rowIterator.next();
-        int cont = 0;
         while (rowIterator.hasNext()) {
             Row row = rowIterator.next();
+
             // Verifica si la fila tiene al menos una celda con valor
             boolean isRowNotEmpty = false;
             for (Cell cell : row) {
@@ -56,6 +55,7 @@ public class Main {
                     break;
                 }
             }
+
             // Si la fila no está vacía, procesa la fila
             if (isRowNotEmpty) {
                 //1- Verificacion del codigo de cuenta bancaria de cliente y generacion del IBAN asociado
@@ -80,11 +80,6 @@ public class Main {
                     //1.2.1- añadirlo al XML
                 }
                 //1.1- imprimir en la cell
-                cont++;
-                if (cont == 69) {
-                    System.out.println("69 " + newCCC);
-                    System.out.println("69 " + IBAN);
-                }
                 writeCell(row, 1, newCCC);//el CCC
                 writeCell(row, 2, IBAN);//el IBAN
             }
