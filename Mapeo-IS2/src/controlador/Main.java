@@ -5,6 +5,7 @@
  */
 package controlador;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -23,6 +24,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.apache.poi.ss.usermodel.Sheet;
+import java.math.BigInteger;
+import org.apache.poi.ss.usermodel.CellValue;
+import org.apache.poi.ss.usermodel.*;
 
 /**
  *
@@ -33,13 +37,15 @@ public class Main {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         //P3
         Excelmanager gestionE = new Excelmanager("/src/resources/SistemasInformacionII.xlsx");
         Sheet traC = gestionE.getSheet(0);
 
         //Iterador de las filas de la hoja
         Iterator<Row> rowIterator = gestionE.getRowIterator();
+        rowIterator.next();
+        int cont = 0;
         while (rowIterator.hasNext()) {
             Row row = rowIterator.next();
             // Verifica si la fila tiene al menos una celda con valor
@@ -55,32 +61,39 @@ public class Main {
                 //1- Verificacion del codigo de cuenta bancaria de cliente y generacion del IBAN asociado
                 String ccc = row.getCell(1).getStringCellValue();
                 String newCCC = "";
+                String IBAN = "";
                 String cccPartes[] = new String[3];
                 if (validarCalcuarCCC(ccc, cccPartes)) {//si el CCC es correcto
-
                     newCCC = unirPartes(cccPartes);
 
                     //1.2-crear IBAN
                     String pais = row.getCell(0).getStringCellValue();
-                    String IBAN = crearIBAN(newCCC, pais);
-                } else {//si el CCC es incorrecto
+                    IBAN = crearIBAN(newCCC, pais);
 
+                } else {//si el CCC es incorrecto
                     newCCC = unirPartes(cccPartes);
 
                     //1.2-Crear IBAN
                     String pais = row.getCell(0).getStringCellValue();
-                    String IBAN = crearIBAN(newCCC, pais);
+                    IBAN = crearIBAN(newCCC, pais);
+
                     //1.2.1- añadirlo al XML
                 }
-
-                //2-Correo
+                //1.1- imprimir en la cell
+                cont++;
+                if (cont == 69) {
+                    System.out.println("69 " + newCCC);
+                    System.out.println("69 " + IBAN);
+                }
+                writeCell(row, 1, newCCC);//el CCC
+                writeCell(row, 2, IBAN);//el IBAN
             }
         }
+        gestionE.modAndShutDown();
     }
 
     private static boolean validarCalcuarCCC(String ccc, String[] cccPartes) {
         boolean ok = false;
-
         if (ccc.length() != 20) {
             return false;
         }
@@ -130,25 +143,33 @@ public class Main {
             sb.append(palabra);
         }
 
-        String newccc = sb.toString();
-        System.out.println(newccc);
-        return newccc;
+        return sb.toString();
     }
 
     private static String crearIBAN(String ccc, String pais) {
 
         //sacar codificacion numerica de las letras del pais || A = 65 => 12 = A - 55
-        String paisNum = "" + String.valueOf((int) pais.charAt(0)) + "" + String.valueOf((int) pais.charAt(1)) + "00";
-        String codigo = ccc + paisNum + "00";
+        int dPais1 = pais.charAt(0) - 55;
+        int dPais2 = pais.charAt(1) - 55;
+
+        String paisNum = "" + dPais1 + "" + dPais2 + "00";
+        String codigo = ccc + paisNum;
 
         //hacer los calculos
-        int num = Integer.parseInt(codigo);
-        int cod = 98 - num;
-        String codS = "" + cod;
+        BigInteger num = new BigInteger(codigo);
+        BigInteger modulo = num.mod(new BigInteger("97"));
+        BigInteger resultado = new BigInteger("98").subtract(modulo);
+        String codS = resultado.toString();
         if (codS.length() < 2) {
             codS = "0" + codS;
         }
-        return pais + codS + ccc;
+        return "" + pais + codS + ccc + "";
+    }
+
+    private static void writeCell(Row row, int i, String in) {
+        Cell celda = row.createCell(i);
+        celda.setCellValue(in);
+
     }
 
 }

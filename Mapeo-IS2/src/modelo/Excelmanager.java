@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 package modelo;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -41,13 +42,14 @@ import modelo.POJOS.Categorias;
  * @author pablo
  */
 public class Excelmanager {
-    
+
     Workbook workbook;
     Sheet sheet;
     Iterator<Row> rowIterator;
+     String rutaRelativa;
     public Excelmanager(String file) {
         try {
-            String rutaRelativa = System.getProperty("user.dir") + file;
+            this.rutaRelativa = System.getProperty("user.dir") + file;
             FileInputStream fileIn = new FileInputStream(rutaRelativa);
             this.workbook = new XSSFWorkbook(fileIn);
         } catch (FileNotFoundException ex) {
@@ -64,5 +66,10 @@ public class Excelmanager {
 
     public Iterator<Row> getRowIterator() {
         return sheet.rowIterator();
+    }
+
+    public void modAndShutDown() throws FileNotFoundException, IOException {
+        workbook.write(new FileOutputStream(rutaRelativa));
+        workbook.close();
     }
 }
