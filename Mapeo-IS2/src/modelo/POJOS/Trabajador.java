@@ -30,7 +30,17 @@ public class Trabajador  implements java.io.Serializable {
     public Trabajador() {
     }
 
-	
+    public Trabajador(int idTrabajador, String nifnie, String nombre, String apellido1, String apellido2, Empresas empresas, Categorias categorias) {
+            this.idTrabajador = idTrabajador;
+            this.nifnie = nifnie;
+            this.nombre = nombre;
+            this.apellido1 = apellido1;
+            this.apellido2 = apellido1;
+            this.empresas = empresas;
+            this.categorias = categorias;
+        }
+   
+    
     public Trabajador(int idTrabajador, Categorias categorias, Empresas empresas, String nombre, String apellido1, String nifnie) {
         this.idTrabajador = idTrabajador;
         this.categorias = categorias;
@@ -159,5 +169,4 @@ public class Trabajador  implements java.io.Serializable {
 
 
 }
-
 
